@@ -7,7 +7,13 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { 
+  getFirestore, 
+  collection, 
+  onSnapshot, 
+  doc, 
+  updateDoc 
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNcLxXSj0SPrgzSl1WCWhV7mRQCCRlWjI",
@@ -23,11 +29,24 @@ const db = getFirestore(app);
 
 onSnapshot(collection(db, "orders"), snap => {
   list.innerHTML = "";
-  snap.forEach(doc => {
-    const o = doc.data();
-    list.innerHTML += `<li>${o.product} — ${o.status}</li>`;
+  snap.forEach(d => {
+    const o = d.data();
+    if (o.status === "pending") {
+      list.innerHTML += `
+        <li>
+          ${o.product} — ${o.status}
+          <button onclick="accept('${d.id}')">Accepter</button>
+        </li>`;
+    }
   });
 });
+
+window.accept = async (id) => {
+  await updateDoc(doc(db, "orders", id), {
+    status: "accepted"
+  });
+  alert("Commande acceptée ✅");
+};
 </script>
 
 </body>
