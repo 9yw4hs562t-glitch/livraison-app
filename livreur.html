@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Livreur</h1>
+<ul id="list"></ul>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBNcLxXSj0SPrgzSl1WCWhV7mRQCCRlWjI",
+      authDomain: "livraison-app-55.firebaseapp.com",
+      projectId: "livraison-app-55",
+      storageBucket: "livraison-app-55.firebasestorage.app",
+      messagingSenderId: "803471478350",
+      appId: "1:803471478350:web:03a4ad9c2e5bd8abd0fd1f"
+    };
+
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+onSnapshot(collection(db, "orders"), snap => {
+  list.innerHTML = "";
+  snap.forEach(d => {
+    if (d.data().status === "pending")
+      list.innerHTML += `<li>${d.data().product}</li>`;
+  });
+});
+</script>
+</body>
+</html>

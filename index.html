@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Connexion</h2>
+
+<input id="email" placeholder="Email"><br><br>
+<input id="password" type="password" placeholder="Mot de passe"><br><br>
+<button id="loginBtn">Se connecter</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBNcLxXSj0SPrgzSl1WCWhV7mRQCCRlWjI",
+      authDomain: "livraison-app-55.firebaseapp.com",
+      projectId: "livraison-app-55",
+      storageBucket: "livraison-app-55.firebasestorage.app",
+      messagingSenderId: "803471478350",
+      appId: "1:803471478350:web:03a4ad9c2e5bd8abd0fd1f"
+    };
+
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+loginBtn.onclick = async () => {
+  const cred = await signInWithEmailAndPassword(auth, email.value, password.value);
+  const uid = cred.user.uid;
+
+  const snap = await getDoc(doc(db, "users", uid));
+  const role = snap.data().role.trim().toLowerCase();
+
+  if (role === "client") location.href = "client.html";
+  if (role === "restaurant") location.href = "restaurant.html";
+  if (role === "livreur") location.href = "livreur.html";
+};
+</script>
+
+</body>
+</html>
