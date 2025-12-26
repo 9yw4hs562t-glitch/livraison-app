@@ -1,15 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Restaurant - Livraison App</title>
+</head>
 <body>
 
-<h2>Restaurant – Commandes reçues</h2>
-<ul id="list"></ul>
+<h2>Restaurant – Commandes à traiter</h2>
+
+<ul id="orders"></ul>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { 
   getFirestore, 
   collection, 
+  query, 
+  where, 
   onSnapshot, 
   doc, 
   updateDoc 
@@ -27,24 +34,42 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-onSnapshot(collection(db, "orders"), snap => {
-  list.innerHTML = "";
-  snap.forEach(d => {
-    const o = d.data();
-    if (o.status === "pending") {
-      list.innerHTML += `
-        <li>
-          ${o.product} — ${o.status}
-          <button onclick="accept('${d.id}')">Accepter</button>
-        </li>`;
-    }
+// UID depuis le login
+const uid = sessionStorage.getItem("uid");
+
+// Sécurité minimale
+if (!uid) {
+  alert("Session expirée ❌");
+  location.href = "index.html";
+}
+
+// 🔍 Voir UNIQUEMENT les commandes en attente
+const q = query(
+  collection(db, "orders"),
+  where("status", "==", "pending")
+);
+
+onSnapshot(q, (snapshot) => {
+  orders.innerHTML = "";
+
+  snapshot.forEach(d => {
+    const data = d.data();
+
+    orders.innerHTML += `
+      <li>
+        ${data.product} — ${data.status}
+        <button onclick="acceptOrder('${d.id}')">Accepter</button>
+      </li>
+    `;
   });
 });
 
-window.accept = async (id) => {
-  await updateDoc(doc(db, "orders", id), {
+// ✅ Accepter une commande
+window.acceptOrder = async (orderId) => {
+  await updateDoc(doc(db, "orders", orderId), {
     status: "accepted"
   });
+
   alert("Commande acceptée ✅");
 };
 </script>
