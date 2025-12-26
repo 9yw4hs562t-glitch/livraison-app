@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Livreur - Commandes</title>
+<title>Livreur - Livraisons</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -10,11 +10,11 @@
 <body>
 
 <header>
-  <h1>Livreur – Commandes à livrer</h1>
+  <h1>Livreur – Mes livraisons</h1>
 </header>
 
 <section class="list">
-  <h3>Commandes disponibles</h3>
+  <h3>Livraisons en cours</h3>
   <ul id="orders"></ul>
 </section>
 
@@ -42,17 +42,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Sécurité minimale
+// UID livreur
 const uid = sessionStorage.getItem("uid");
 if (!uid) {
   alert("Session expirée");
   location.href = "index.html";
 }
 
-// 🔍 Commandes acceptées
+// 🔍 MES livraisons en cours
 const q = query(
   collection(db, "orders"),
-  where("status", "==", "accepted")
+  where("status", "==", "delivering"),
+  where("livreurUid", "==", uid)
 );
 
 onSnapshot(q, (snapshot) => {
@@ -62,19 +63,18 @@ onSnapshot(q, (snapshot) => {
     orders.innerHTML += `
       <li>
         <b>${data.product}</b> — ${data.status}
-        <button onclick="takeOrder('${d.id}')">Prendre</button>
+        <button onclick="deliverOrder('${d.id}')">Livré</button>
       </li>
     `;
   });
 });
 
-// 🚴 Prendre la livraison
-window.takeOrder = async (orderId) => {
+// ✅ Livraison terminée
+window.deliverOrder = async (orderId) => {
   await updateDoc(doc(db, "orders", orderId), {
-    status: "delivering",
-    livreurUid: uid
+    status: "delivered"
   });
-  alert("Livraison prise 🚴");
+  alert("Commande livrée ✅");
 };
 </script>
 
