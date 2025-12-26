@@ -25,11 +25,16 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 orderBtn.onclick = async () => {
-  await addDoc(collection(db, "orders"), {
-    product: product.value,
-    status: "pending",
-    createdAt: serverTimestamp()
-  });
+  import { getAuth } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+const auth = getAuth(app);
+
+await addDoc(collection(db, "orders"), {
+  product: product.value,
+  status: "pending",
+  clientUid: auth.currentUser.uid,
+  createdAt: serverTimestamp()
+});
   alert("Commande envoyée");
 };
 </script>
