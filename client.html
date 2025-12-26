@@ -1,42 +1,66 @@
 <!DOCTYPE html>
 <html>
 <body>
-<h1>Client</h1>
 
-<input id="product" placeholder="Produit"><br><br>
+<h2>Client – Passer une commande</h2>
+
+<input id="product" placeholder="Produit (ex: Pizza)">
 <button id="orderBtn">Commander</button>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { 
+  getAuth, 
+  onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBNcLxXSj0SPrgzSl1WCWhV7mRQCCRlWjI",
-      authDomain: "livraison-app-55.firebaseapp.com",
-      projectId: "livraison-app-55",
-      storageBucket: "livraison-app-55.firebasestorage.app",
-      messagingSenderId: "803471478350",
-      appId: "1:803471478350:web:03a4ad9c2e5bd8abd0fd1f"
-    };
-
+const firebaseConfig = {
+  apiKey: "AIzaSyBNcLxXSj0SPrgzSl1WCWhV7mRQCCRlWjI",
+  authDomain: "livraison-app-55.firebaseapp.com",
+  projectId: "livraison-app-55",
+  storageBucket: "livraison-app-55.firebasestorage.app",
+  messagingSenderId: "803471478350",
+  appId: "1:803471478350:web:03a4ad9c2e5bd8abd0fd1f"
+};
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
-orderBtn.onclick = async () => {
-  import { getAuth } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+let currentUid = null;
 
-const auth = getAuth(app);
-
-await addDoc(collection(db, "orders"), {
-  product: product.value,
-  status: "pending",
-  clientUid: auth.currentUser.uid,
-  createdAt: serverTimestamp()
+// 👇 attendre que l'utilisateur soit bien connecté
+onAuthStateChanged(auth, user => {
+  if (user) {
+    currentUid = user.uid;
+  } else {
+    alert("Utilisateur non connecté ❌");
+    location.href = "index.html";
+  }
 });
-  alert("Commande envoyée");
+
+orderBtn.onclick = async () => {
+  if (!currentUid) {
+    alert("UID non prêt, attends 1 seconde ⏳");
+    return;
+  }
+
+  await addDoc(collection(db, "orders"), {
+    product: product.value,
+    status: "pending",
+    clientUid: currentUid,
+    createdAt: serverTimestamp()
+  });
+
+  alert("Commande envoyée ✅");
 };
 </script>
+
 </body>
 </html>
