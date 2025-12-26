@@ -1,88 +1,40 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Client - Livraison App</title>
+<meta charset="UTF-8">
+<title>Livraison Locale</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/style.css">
 </head>
-<body>
 
-<h2>Client – Passer une commande</h2>
+<body class="mobile">
 
-<input id="product" placeholder="Produit (ex: Pizza)">
-<button id="orderBtn">Commander</button>
+<header>
+  <h1>Livraison Locale</h1>
+  <input placeholder="Rechercher des restaurants...">
+</header>
 
-<hr>
+<section class="list">
 
-<h3>Mes commandes</h3>
-<ul id="orders"></ul>
+  <div class="card">
+    <img src="https://via.placeholder.com/80">
+    <div>
+      <h3>Pizzeria Bella Napoli</h3>
+      <p>⏱ 20 min • 💰 210 DZD</p>
+      <button>Commander</button>
+    </div>
+  </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  serverTimestamp,
-  query,
-  where,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+  <div class="card">
+    <img src="https://via.placeholder.com/80">
+    <div>
+      <h3>Le Gourmet Burger</h3>
+      <p>⏱ 25 min • 💰 250 DZD</p>
+      <button>Commander</button>
+    </div>
+  </div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBNcLxXSj0SPrgzSl1WCWhV7mRQCCRlWjI",
-  authDomain: "livraison-app-55.firebaseapp.com",
-  projectId: "livraison-app-55",
-  storageBucket: "livraison-app-55.firebasestorage.app",
-  messagingSenderId: "803471478350",
-  appId: "1:803471478350:web:03a4ad9c2e5bd8abd0fd1f"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// UID récupéré depuis le login
-const uid = sessionStorage.getItem("uid");
-
-// Sécurité minimale
-if (!uid) {
-  alert("Session expirée ❌");
-  location.href = "index.html";
-}
-
-// ➕ Créer une commande
-orderBtn.onclick = async () => {
-  if (!product.value) {
-    alert("Entre un produit ❌");
-    return;
-  }
-
-  await addDoc(collection(db, "orders"), {
-    product: product.value,
-    status: "pending",
-    clientUid: uid,
-    createdAt: serverTimestamp()
-  });
-
-  product.value = "";
-  alert("Commande envoyée ✅");
-};
-
-// 📥 Lire UNIQUEMENT mes commandes
-const q = query(
-  collection(db, "orders"),
-  where("clientUid", "==", uid)
-);
-
-onSnapshot(q, (snapshot) => {
-  orders.innerHTML = "";
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    orders.innerHTML += `
-      <li>${data.product} — ${data.status}</li>
-    `;
-  });
-});
-</script>
+</section>
 
 </body>
 </html>
