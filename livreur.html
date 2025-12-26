@@ -1,34 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Livreur - Livraison App</title>
+</head>
 <body>
-<h1>Livreur</h1>
-<ul id="list"></ul>
+
+<h2>Livreur – Commandes à livrer</h2>
+
+<ul id="orders"></ul>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { 
+  getFirestore, 
+  collection, 
+  query, 
+  where, 
+  onSnapshot, 
+  doc, 
+  updateDoc 
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBNcLxXSj0SPrgzSl1WCWhV7mRQCCRlWjI",
-      authDomain: "livraison-app-55.firebaseapp.com",
-      projectId: "livraison-app-55",
-      storageBucket: "livraison-app-55.firebasestorage.app",
-      messagingSenderId: "803471478350",
-      appId: "1:803471478350:web:03a4ad9c2e5bd8abd0fd1f"
-    };
-
+const firebaseConfig = {
+  apiKey: "AIzaSyBNcLxXSj0SPrgzSl1WCWhV7mRQCCRlWjI",
+  authDomain: "livraison-app-55.firebaseapp.com",
+  projectId: "livraison-app-55",
+  storageBucket: "livraison-app-55.firebasestorage.app",
+  messagingSenderId: "803471478350",
+  appId: "1:803471478350:web:03a4ad9c2e5bd8abd0fd1f"
+};
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-onSnapshot(collection(db, "orders"), snap => {
-  list.innerHTML = "";
-  snap.forEach(d => {
-    if (d.data().status === "pending")
-      list.innerHTML += `<li>${d.data().product}</li>`;
+// UID depuis le login
+const uid = sessionStorage.getItem("uid");
+
+// Sécurité minimale
+if (!uid) {
+  alert("Session expirée ❌");
+  location.href = "index.html";
+}
+
+// 🔍 Voir UNIQUEMENT les commandes acceptées
+const q = query(
+  collection(db, "orders"),
+  where("status", "==", "accepted")
+);
+
+onSnapshot(q, (snapshot) => {
+  orders.innerHTML = "";
+
+  snapshot.forEach(d => {
+    const data = d.data();
+
+    orders.innerHTML += `
+      <li>
+        ${data.product} — ${data.status}
+        <button onclick="takeOrder('${d.id}')">Prendre livraison</button>
+      </li>
+    `;
   });
 });
+
+// 🚴 Prendre la livraison
+window.takeOrder = async (orderId) => {
+  await updateDoc(doc(db, "orders", orderId), {
+    status: "delivering",
+    livreurUid: uid
+  });
+
+  alert("Livraison prise 🚴");
+};
 </script>
+
 </body>
 </html>
