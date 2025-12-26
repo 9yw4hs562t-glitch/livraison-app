@@ -1,14 +1,22 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Restaurant - Livraison App</title>
+<meta charset="UTF-8">
+<title>Restaurant Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
-<h2>Restaurant – Commandes à traiter</h2>
+<header>
+  <h1>Restaurant – Commandes</h1>
+</header>
 
-<ul id="orders"></ul>
+<section class="list">
+  <h3>Commandes en attente</h3>
+  <ul id="orders"></ul>
+</section>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
@@ -17,9 +25,9 @@ import {
   collection, 
   query, 
   where, 
-  onSnapshot, 
-  doc, 
-  updateDoc 
+  onSnapshot,
+  doc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -34,16 +42,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// UID depuis le login
-const uid = sessionStorage.getItem("uid");
-
 // Sécurité minimale
+const uid = sessionStorage.getItem("uid");
 if (!uid) {
-  alert("Session expirée ❌");
+  alert("Session expirée");
   location.href = "index.html";
 }
 
-// 🔍 Voir UNIQUEMENT les commandes en attente
+// 🔍 Commandes en attente
 const q = query(
   collection(db, "orders"),
   where("status", "==", "pending")
@@ -51,13 +57,11 @@ const q = query(
 
 onSnapshot(q, (snapshot) => {
   orders.innerHTML = "";
-
   snapshot.forEach(d => {
     const data = d.data();
-
     orders.innerHTML += `
       <li>
-        ${data.product} — ${data.status}
+        <b>${data.product}</b> — ${data.status}
         <button onclick="acceptOrder('${d.id}')">Accepter</button>
       </li>
     `;
@@ -69,7 +73,6 @@ window.acceptOrder = async (orderId) => {
   await updateDoc(doc(db, "orders", orderId), {
     status: "accepted"
   });
-
   alert("Commande acceptée ✅");
 };
 </script>
