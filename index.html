@@ -35,7 +35,8 @@ loginBtn.onclick = async () => {
   const snap = await getDoc(doc(db, "users", uid));
   const role = snap.data().role.trim().toLowerCase();
 
-  if (role === "client") location.href = "client.html";
+  sessionStorage.setItem("uid", uid);
+if (role === "client") location.href = "client.html";
   if (role === "restaurant") location.href = "restaurant.html";
   if (role === "livreur") location.href = "livreur.html";
 };
