@@ -7,11 +7,11 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="mobile">
+<body>
 
 <header>
   <h1>Livraison Locale</h1>
-  <input placeholder="Rechercher des restaurants...">
+  <input placeholder="Rechercher des restaurants..." disabled>
 </header>
 
 <section class="list">
@@ -21,7 +21,7 @@
     <div>
       <h3>Pizzeria Bella Napoli</h3>
       <p>⏱ 20 min • 💰 210 DZD</p>
-      <button>Commander</button>
+      <button onclick="order('Pizza Bella Napoli')">Commander</button>
     </div>
   </div>
 
@@ -30,11 +30,73 @@
     <div>
       <h3>Le Gourmet Burger</h3>
       <p>⏱ 25 min • 💰 250 DZD</p>
-      <button>Commander</button>
+      <button onclick="order('Burger Gourmet')">Commander</button>
     </div>
   </div>
 
 </section>
+
+<hr>
+
+<h3>Mes commandes</h3>
+<ul id="orders"></ul>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  serverTimestamp,
+  query,
+  where,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBNcLxXSj0SPrgzSl1WCWhV7mRQCCRlWjI",
+  authDomain: "livraison-app-55.firebaseapp.com",
+  projectId: "livraison-app-55",
+  storageBucket: "livraison-app-55.firebasestorage.app",
+  messagingSenderId: "803471478350",
+  appId: "1:803471478350:web:03a4ad9c2e5bd8abd0fd1f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// UID depuis login
+const uid = sessionStorage.getItem("uid");
+if (!uid) {
+  alert("Session expirée");
+  location.href = "index.html";
+}
+
+// 🔥 FONCTION COMMANDE
+window.order = async (productName) => {
+  await addDoc(collection(db, "orders"), {
+    product: productName,
+    status: "pending",
+    clientUid: uid,
+    createdAt: serverTimestamp()
+  });
+  alert("Commande envoyée ✅");
+};
+
+// 📥 Mes commandes uniquement
+const q = query(
+  collection(db, "orders"),
+  where("clientUid", "==", uid)
+);
+
+onSnapshot(q, (snapshot) => {
+  orders.innerHTML = "";
+  snapshot.forEach(doc => {
+    const d = doc.data();
+    orders.innerHTML += `<li>${d.product} — ${d.status}</li>`;
+  });
+});
+</script>
 
 </body>
 </html>
